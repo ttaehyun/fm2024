@@ -11,6 +11,7 @@
 #include "afxwin.h"
 #include "fstream"
 #include "sstream"
+#include "iostream"
 #include "vector"
 #include "string"
 
@@ -19,21 +20,23 @@
 #endif
 
 //이중 순환 연결리스트
-struct Node {
-	player data;
+class Node {
+public:
+	Player data;
 	Node* next;
 	Node* prev;
 
-	Node(player val) : data(val), next(nullptr), prev(nullptr) {}
+	Node(const Player& data) : data(data), next(nullptr), prev(nullptr) {}
 };
 
 class LinkedList {
-private:
-	Node* head;
-public:
-	LinkedList() : head(nullptr) {}
 
-	void Insert(player data) {
+public:
+	Node* head;
+	Node* current;
+	LinkedList() : head(nullptr), current(nullptr) {}
+
+	void Insert(const Player& data) {
 		Node* newNode = new Node(data);
 
 		if (!head) {
@@ -44,12 +47,196 @@ public:
 		else {
 			Node* tail = head->prev;
 			tail->next = newNode;
+			newNode->prev = tail;
+			newNode->next = head;
+			head->prev = newNode;
+		}
+		current = head;
+	}
+	void Delete(int UID) {
+		if (!head) return;
+
+		Node* current_del = head;
+		do {
+			if (current_del->data.UID == UID) {
+				if (current_del->next == current_del) {
+					delete current;
+					head = nullptr;
+				}
+				else {
+					Node* prevNode = current_del->prev;
+					Node* nextNode = current_del->next;
+					prevNode->next = nextNode;
+					nextNode->prev = prevNode;
+
+					if (current_del == head) head = nextNode;
+					delete current_del;
+				}
+				return;
+			}
+			current_del = current_del->next;
+		} while (current_del != head);
+	}
+	Player* GetCurrentPlayer() {
+		if (current) {
+			return &current->data;
+		}
+		return nullptr;
+	}
+	void MoveNext() {
+		if (current) {
+			current = current->next;
 		}
 	}
-	void Delete(player data) {
-
+	void MovePrev() {
+		if (current) {
+			current = current->prev;
+		}
+	}
+	~LinkedList() {
+		if (!head) return;
+		Node* current = head;
+		do {
+			Node* nextNode = current->next;
+			delete current;
+			current = nextNode;
+		} while (current != head);
 	}
 };
+
+class ListCSVrecommond : public LinkedList {
+public:
+	
+	void ReadCSVFile(const std::string& filename) {
+		std::ifstream file(filename);
+		if (!file.is_open()) {
+			AfxMessageBox(_T("파일 열수 없음"));
+			//std::cerr << "Could not open the file " << filename << std::endl;
+			//return;
+		}
+
+		std::string line;
+		bool header = true;
+		while (std::getline(file, line)) {
+			if (header) {  // 헤더 행은 건너뜀
+				header = false;
+				continue;
+			}
+
+			std::istringstream ss(line);
+			std::string token;
+
+			Player player;
+			int fieldCount = 0;
+			
+			// CSV 파일의 각 필드를 ','로 분리하여 Player 멤버에 할당
+			while (std::getline(ss, token, ',')) {
+				switch (fieldCount) {
+				case 0: player.name = CString(token.c_str()); break;
+				case 1: player.position_str = CString(token.c_str()); break;
+				case 2: player.age = std::stoi(token); break;
+				case 3: player.average.CA = std::stoi(token); break;
+				case 4: player.average.PA = std::stoi(token); break;
+				case 5: player.nationality = CString(token.c_str()); break;
+				case 6: player.club = CString(token.c_str()); break;
+				case 7: player.stat.corners = std::stoi(token); break;
+				case 8: player.stat.crossing = std::stoi(token); break;
+				case 9: player.stat.dribbling = std::stoi(token); break;
+				case 10: player.stat.finishing = std::stoi(token); break;
+				case 11: player.stat.first_touch = std::stoi(token); break;
+				case 12: player.stat.free_kick_taking = std::stoi(token); break;
+				case 13: player.stat.heading = std::stoi(token); break;
+				case 14: player.stat.long_shots = std::stoi(token); break;
+				case 15: player.stat.long_throws = std::stoi(token); break;
+				case 16: player.stat.marking = std::stoi(token); break;
+				case 17: player.stat.passing = std::stoi(token); break;
+				case 18: player.stat.penalty_taking = std::stoi(token); break;
+				case 19: player.stat.tackling = std::stoi(token); break;
+				case 20: player.stat.technique = std::stoi(token); break;
+				case 21: player.stat.aggression = std::stoi(token); break;
+				case 22: player.stat.anticipation = std::stoi(token); break;
+				case 23: player.stat.bravery = std::stoi(token); break;
+				case 24: player.stat.composure = std::stoi(token); break;
+				case 25: player.stat.concentration = std::stoi(token); break;
+				case 26: player.stat.vision = std::stoi(token); break;
+				case 27: player.stat.decision = std::stoi(token); break;
+				case 28: player.stat.determination = std::stoi(token); break;
+				case 29: player.stat.flair = std::stoi(token); break;
+				case 30: player.stat.leadership = std::stoi(token); break;
+				case 31: player.stat.off_the_ball = std::stoi(token); break;
+				case 32: player.stat.position = std::stoi(token); break;
+				case 33: player.stat.teamwork = std::stoi(token); break;
+				case 34: player.stat.work_rate = std::stoi(token); break;
+				case 35: player.stat.acceleration = std::stoi(token); break;
+				case 36: player.stat.agility = std::stoi(token); break;
+				case 37: player.stat.balance = std::stoi(token); break;
+				case 38: player.stat.jumping_reach = std::stoi(token); break;
+				case 39: player.stat.natural_fitness = std::stoi(token); break;
+				case 40: player.stat.pace = std::stoi(token); break;
+				case 41: player.stat.stamina = std::stoi(token); break;
+				case 42: player.stat.strength = std::stoi(token); break;
+				case 43: player.stat.stability = std::stoi(token); break;
+				case 44: player.stat.foul = std::stoi(token); break;
+				case 45: player.stat.contest_performance = std::stoi(token); break;
+				case 46: player.stat.injury = std::stoi(token); break;
+				case 47: player.stat.diversity = std::stoi(token); break;
+				case 48: player.stat.aerial_reach = std::stoi(token); break;
+				case 49: player.stat.command_of_area = std::stoi(token); break;
+				case 50: player.stat.communication = std::stoi(token); break;
+				case 51: player.stat.eccentricity = std::stoi(token); break;
+				case 52: player.stat.handling = std::stoi(token); break;
+				case 53: player.stat.kicking = std::stoi(token); break;
+				case 54: player.stat.one_on_ones = std::stoi(token); break;
+				case 55: player.stat.reflexes = std::stoi(token); break;
+				case 56: player.stat.rushing_out = std::stoi(token); break;
+				case 57: player.stat.punching = std::stoi(token); break;
+				case 58: player.stat.throwing = std::stoi(token); break;
+				case 59: player.stat.adaptation = std::stoi(token); break;
+				case 60: player.stat.ambition = std::stoi(token); break;
+				case 61: player.stat.argue = std::stoi(token); break;
+				case 62: player.stat.loyal = std::stoi(token); break;
+				case 63: player.stat.resistant_to_stress = std::stoi(token); break;
+				case 64: player.stat.professional = std::stoi(token); break;
+				case 65: player.stat.sportsmanship = std::stoi(token); break;
+				case 66: player.stat.emotional_control = std::stoi(token); break;
+				case 67: player.positionStat.GK = std::stoi(token); break;
+				case 68: player.positionStat.DL = std::stoi(token); break;
+				case 69: player.positionStat.DC = std::stoi(token); break;
+				case 70: player.positionStat.DR = std::stoi(token); break;
+				case 71: player.positionStat.WBL = std::stoi(token); break;
+				case 72: player.positionStat.WBR = std::stoi(token); break;
+				case 73: player.positionStat.DM = std::stoi(token); break;
+				case 74: player.positionStat.ML = std::stoi(token); break;
+				case 75: player.positionStat.MC = std::stoi(token); break;
+				case 76: player.positionStat.MR = std::stoi(token); break;
+				case 77: player.positionStat.AML = std::stoi(token); break;
+				case 78: player.positionStat.AMC = std::stoi(token); break;
+				case 79: player.positionStat.AMR = std::stoi(token); break;
+				case 80: player.positionStat.ST = std::stoi(token); break;
+				case 81: player.bodyStat.height = std::stoi(token); break;
+				case 82: player.bodyStat.weight = std::stoi(token); break;
+				case 83: player.footStat.left = std::stoi(token); break;
+				case 84: player.footStat.right = std::stoi(token); break;
+				case 92: player.date_of_birth = CString(token.c_str()); break;
+				case 95: player.salary = std::stoi(token); break;
+				case 97: player.UID = std::stoi(token); break;
+				default: break;
+				}
+				fieldCount++;
+			}
+
+			// Player 객체를 리스트에 추가
+			Insert(player);
+		}
+
+		file.close();
+	}
+	//recommond함수
+
+};
+
+ListCSVrecommond list;
+// -----------------------------------------------------------------------------//
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
 class CAboutDlg : public CDialogEx
@@ -237,6 +424,9 @@ BEGIN_MESSAGE_MAP(Cfm2024Dlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+
+	ON_BN_CLICKED(IDC_BUTTON_NEXT, &Cfm2024Dlg::OnClickedButtonNext)
+	ON_BN_CLICKED(IDC_BUTTON_PREV, &Cfm2024Dlg::OnClickedButtonPrev)
 END_MESSAGE_MAP()
 
 
@@ -272,7 +462,10 @@ BOOL Cfm2024Dlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-
+	
+	list.ReadCSVFile("FM2023.csv");
+	UpdateDisplay();
+	
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -325,35 +518,95 @@ HCURSOR Cfm2024Dlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
-void Cfm2024Dlg::ReadCSVFile(const CString& filePath)
+void Cfm2024Dlg::UpdateDisplay()
 {
 	// TODO: 여기에 구현 코드 추가.
-	//파일 스트림 생성
-	std::ifstream file((CT2CA)filePath);
-
-	//파일 열기 성공 확인
-	if (!file.is_open()) {
-		AfxMessageBox(_T("파일을 열 숭 없습니다."));
-		return;
+	Player* player = list.GetCurrentPlayer();
+	if (player) {
+		m_strName = player->name;;
+		m_intAge = player->age;
+		m_intAge = player->age;
+		m_strBirth = player->date_of_birth;
+		m_intHeight = player->bodyStat.height;
+		m_intWeight = player->bodyStat.weight;
+		m_strPosition = player->position_str;
+		m_intCorners = player->stat.corners;
+		m_intCrossing = player->stat.crossing;
+		m_intDribbling = player->stat.dribbling;
+		m_intFinishing = player->stat.finishing;
+		m_intFirst_touch = player->stat.first_touch;
+		m_intFree_kick = player->stat.free_kick_taking;
+		m_intHeading = player->stat.heading;
+		m_intLong_shot = player->stat.long_shots;
+		m_intLong_throw = player->stat.long_throws;
+		m_intMarking = player->stat.marking;
+		m_intPassing = player->stat.passing;
+		m_intPenalty_taking = player->stat.penalty_taking;
+		m_intTackling = player->stat.tackling;
+		m_intTechnique = player->stat.technique;
+		m_intAggression = player->stat.aggression;
+		m_intAnticipation = player->stat.anticipation;
+		m_intBravery = player->stat.bravery;
+		m_intComposure = player->stat.composure;
+		m_intConcentration = player->stat.concentration;
+		m_intVision = player->stat.vision;
+		m_intDecision = player->stat.decision;
+		m_intDetermination = player->stat.determination;
+		m_intFlair = player->stat.flair;
+		m_intLeadership = player->stat.leadership;
+		m_intOff_the_ball = player->stat.off_the_ball;
+		m_intPosition_stat = player->stat.position;
+		m_intTeamwork = player->stat.teamwork;
+		m_intWork_rate = player->stat.work_rate;
+		m_intAcceleration = player->stat.acceleration;
+		m_intAgility = player->stat.agility;
+		m_intBalance = player->stat.balance;
+		m_intJumping_reach = player->stat.jumping_reach;
+		m_intNatural_fitness = player->stat.natural_fitness;
+		m_intPace = player->stat.pace;
+		m_intStamina = player->stat.stamina;
+		m_intStrength = player->stat.strength;
+		m_intStability = player->stat.stability;
+		m_intFoul = player->stat.foul;
+		m_intCP = player->stat.contest_performance;
+		m_intInjury = player->stat.injury;
+		m_intDiversity = player->stat.diversity;
+		m_intAerialReach = player->stat.aerial_reach;
+		m_intCOA = player->stat.command_of_area;
+		m_intCommunication = player->stat.communication;
+		m_intEccentricity = player->stat.eccentricity;
+		m_intHandling = player->stat.handling;
+		m_intKicking = player->stat.kicking;
+		m_intOne_on_ones = player->stat.one_on_ones;
+		m_intReflexes = player->stat.reflexes;
+		m_intRushing_out = player->stat.rushing_out;
+		m_intPunching = player->stat.punching;
+		m_intThrowing = player->stat.throwing;
+		m_intAdaptation = player->stat.adaptation;
+		m_intAmbition = player->stat.ambition;
+		m_intArgue = player->stat.argue;
+		m_intLoyal = player->stat.loyal;
+		m_intResistant_of_stress = player->stat.resistant_to_stress;
+		m_intProfessional = player->stat.professional;
+		m_intSportsmanship = player->stat.sportsmanship;
+		m_intEmotional_control = player->stat.emotional_control;
+		UpdateData(FALSE);
 	}
-
-	std::string line;
-	while (std::getline(file, line)) {
-		std::stringstream lineStream(line);
-		std::string cell;
-		std::vector<std::string> rowData;
-
-		while (std::getline(lineStream, cell, ',')) {
-			rowData.push_back(cell);
-		}
-
-		for (const auto& data : rowData) {
-			AfxMessageBox(CString(data.c_str()));
-		}
-	}
-
-	file.close();
 }
 
+
+
+void Cfm2024Dlg::OnClickedButtonNext()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	list.MoveNext();
+	UpdateDisplay();
+}
+
+
+void Cfm2024Dlg::OnClickedButtonPrev()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	list.MovePrev();
+	UpdateDisplay();
+}

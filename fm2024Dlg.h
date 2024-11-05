@@ -3,8 +3,154 @@
 //
 
 #pragma once
+//Player class
+
+class Average {
+public:
+    int CA;
+    int PA;
+};
+
+class FootStat {
+public:
+    int left;
+    int right;
+};
+
+class PositionStat {
+public:
+    int GK;
+    int DL;
+    int DC;
+    int DR;
+    int WBL;
+    int WBR;
+    int DM;
+    int ML;
+    int MC;
+    int MR;
+    int AML;
+    int AMC;
+    int AMR;
+    int ST;
+};
+
+class BodyStat {
+public:
+    int height;
+    int weight;
+};
+
+class Stat {
+public:
+    int corners;
+    int crossing;
+    int dribbling;
+    int finishing;
+    int first_touch;
+    int free_kick_taking;
+    int heading;
+    int long_shots;
+    int long_throws;
+    int marking;
+    int passing;
+    int penalty_taking;
+    int tackling;
+    int technique;
+    int aggression;
+    int anticipation;
+    int bravery;
+    int composure;
+    int concentration;
+    int vision;
+    int decision;
+    int determination;
+    int flair;
+    int leadership;
+    int off_the_ball;
+    int position;
+    int teamwork;
+    int work_rate;
+    int acceleration;
+    int agility;
+    int balance;
+    int jumping_reach;
+    int natural_fitness;
+    int pace;
+    int stamina;
+    int strength;
+    int stability;
+    int foul;
+    int contest_performance;
+    int injury;
+    int diversity;
+    int aerial_reach;
+    int command_of_area;
+    int communication;
+    int eccentricity;
+    int handling;
+    int kicking;
+    int one_on_ones;
+    int reflexes;
+    int rushing_out;
+    int punching;
+    int throwing;
+    int adaptation;
+    int ambition;
+    int argue;
+    int loyal;
+    int resistant_to_stress;
+    int professional;
+    int sportsmanship;
+    int emotional_control;
+};
+
+// Player 클래스 정의
+class Player {
+public:
+    int UID;
+    CString name;
+    int age;
+    int salary;
+    CString nationality;
+    CString club;
+    CString position_str;
+    CString date_of_birth;
+
+    // 세부 속성을 멤버로 포함
+    Average average;
+    FootStat footStat;
+    PositionStat positionStat;
+    BodyStat bodyStat;
+    Stat stat;
 
 
+
+};
+
+//class Node {
+//public:
+//    Player data;
+//    Node* next;
+//    Node* prev;
+//
+//    Node(const Player& data);
+//};
+//
+//class LinkedList {
+//public:
+//    Node* head;
+//    LinkedList();
+//    void Insert(const Player& data);
+//    void Delete(int UID);
+//    ~LinkedList();
+//};
+//
+//class ListCSVrecommond :public LinkedList {
+//public:
+//    void ReadCSVFile(const std::string& filename);
+//
+//};
 // Cfm2024Dlg 대화 상자
 class Cfm2024Dlg : public CDialogEx
 {
@@ -99,122 +245,11 @@ public:
 	int m_intWork_rate;
 	CString m_strPosition;
 	int m_intPosition_stat;
-	void ReadCSVFile(const CString& filePath);
-};
-
-//Player class
-
-class average {
-public:
-	int CA;
-	int PA;
-};
-
-class foot_stat {
-public:
-	int left;
-	int right;
-};
-
-class position_stat {
-public:
-	int GK;
-	int DL;
-	int DC;
-	int DR;
-	int WBL;
-	int WBR;
-	int DM;
-	int ML;
-	int MC;
-	int MR;
-	int AML;
-	int AMC;
-	int AMR;
-	int ST;
-};
-
-class body_stat {
-public:
-	int height;
-	int weight;
-};
-
-class Stat {
-public:
-	int corners;
-	int crossing;
-	int dribbling;
-	int finishing;
-	int first_touch;
-	int free_kick_taking;
-	int heading;
-	int long_shots;
-	int long_throws;
-	int marking;
-	int passing;
-	int penalty_taking;
-	int tackling;
-	int technique;
-	int aggression;
-	int anticipation;
-	int bravery;
-	int composure;
-	int concentration;
-	int vision;
-	int decision;
-	int determination;
-	int flair;
-	int leadership;
-	int off_the_ball;
-	int position;
-	int teamwork;
-	int work_rate;
-	int acceleration;
-	int agility;
-	int balance;
-	int jumping_reach;
-	int natural_fitness;
-	int pace;
-	int stamina;
-	int strength;
-	int stability;
-	int foul;
-	int contest_performance;
-	int injury;
-	int diversity;
-	int aerial_reach;
-	int command_of_area;
-	int communication;
-	int eccentricity;
-	int handling;
-	int kicking;
-	int one_on_ones;
-	int reflexes;
-	int rushing_out;
-	int punching;
-	int throwing;
-	int adaptation;
-	int ambition;
-	int argue;
-	int loyal;
-	int resistant_to_stress;
-	int professional;
-	int sportsmanship;
-	int emotional_control;
-};
-class player : public average, public foot_stat, public position_stat, public body_stat, public Stat
-{
-public:
-	int UID;
-	CString name;
-	int age;
-	int salary;
-	CString nationality;
-	CString club;
-	CString position_str;
-	CString date_of_birth;
 	
-	void Recommond();
+
+    void UpdateDisplay();
+
+    afx_msg void OnClickedButtonNext();
+    afx_msg void OnClickedButtonPrev();
 };
 
