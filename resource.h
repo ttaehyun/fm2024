@@ -7,6 +7,7 @@
 #define IDS_ABOUTBOX                    101
 #define IDD_FM2024_DIALOG               102
 #define IDR_MAINFRAME                   128
+#define IDD_DIALOG1                     132
 #define IDC_EDIT_CORNERS                1000
 #define IDC_EDIT_CROSSING               1001
 #define IDC_EDIT_DRIBBLING              1002
@@ -74,14 +75,16 @@
 #define IDC_EDIT_SPORTSMANSHIP          1064
 #define IDC_EDIT_EMOTIONAL_CONTROL      1065
 #define IDC_EDIT_POSITION               1066
+#define IDC_BUTTON1                     1067
+#define IDC_BUTTON2                     1068
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        132
+#define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1067
+#define _APS_NEXT_CONTROL_VALUE         1069
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
