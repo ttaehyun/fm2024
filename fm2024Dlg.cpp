@@ -219,7 +219,7 @@ public:
 				case 84: player.footStat.right = std::stoi(token); break;
 				case 92: player.date_of_birth = CString(token.c_str()); break;
 				case 95: player.salary = std::stoi(token); break;
-				case 97: player.UID = std::stoi(token); break;
+				case 97: player.UID = CString(token.c_str()); break;
 				default: break;
 				}
 				fieldCount++;
@@ -418,6 +418,7 @@ void Cfm2024Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT_WORK_RATE, m_intWork_rate);
 	DDX_Text(pDX, IDC_EDIT_POSITION, m_strPosition);
 	DDX_Text(pDX, IDC_EDIT_POSITION_STAT, m_intPosition_stat);
+	DDX_Control(pDX, IDC_FACE, m_picture_control);
 }
 
 BEGIN_MESSAGE_MAP(Cfm2024Dlg, CDialogEx)
@@ -462,10 +463,17 @@ BOOL Cfm2024Dlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-	
+	m_filepath = _T("C:\\Users\\th\\Desktop\\24-2opensw\\fm2024\\image\\");
 	list.ReadCSVFile("FM2023.csv");
+	//m_strUIDPath = m_filepath + list.head->data.UID;
 	UpdateDisplay();
 	
+	// 이미지 로드
+	if (FAILED(m_image.Load(m_strUIDPath))) {
+		AfxMessageBox(_T("이미지를 로드할 수 없습니다."));
+	}
+
+	return TRUE;  // 다이얼로그 초기화가 완료되었음을 나타냄
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -509,6 +517,15 @@ void Cfm2024Dlg::OnPaint()
 	{
 		CDialogEx::OnPaint();
 	}
+	if (m_image)  // 이미지가 로드되었는지 확인
+	{
+		CRect rect;
+		m_picture_control.GetClientRect(&rect);  // Picture Control의 크기 얻기
+
+		CDC* pDC = m_picture_control.GetDC();
+		m_image.StretchBlt(pDC->m_hDC, 0, 0, rect.Width(), rect.Height(), SRCCOPY);  // 이미지 출력
+		m_picture_control.ReleaseDC(pDC);  // DC 해제
+	}
 }
 
 // 사용자가 최소화된 창을 끄는 동안에 커서가 표시되도록 시스템에서
@@ -523,6 +540,7 @@ void Cfm2024Dlg::UpdateDisplay()
 	// TODO: 여기에 구현 코드 추가.
 	Player* player = list.GetCurrentPlayer();
 	if (player) {
+		m_strUIDPath = m_filepath + player->UID + _T(".png");
 		m_strName = player->name;;
 		m_intAge = player->age;
 		m_intAge = player->age;
@@ -590,10 +608,13 @@ void Cfm2024Dlg::UpdateDisplay()
 		m_intProfessional = player->stat.professional;
 		m_intSportsmanship = player->stat.sportsmanship;
 		m_intEmotional_control = player->stat.emotional_control;
+		
 		UpdateData(FALSE);
+		//Invalidate();
+		//UpdateWindow();
 	}
+		
 }
-
 
 
 void Cfm2024Dlg::OnClickedButtonNext()
@@ -601,6 +622,12 @@ void Cfm2024Dlg::OnClickedButtonNext()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	list.MoveNext();
 	UpdateDisplay();
+
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
 }
 
 
@@ -609,4 +636,9 @@ void Cfm2024Dlg::OnClickedButtonPrev()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	list.MovePrev();
 	UpdateDisplay();
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
 }

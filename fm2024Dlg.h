@@ -1,7 +1,7 @@
 ﻿
 // fm2024Dlg.h: 헤더 파일
 //
-
+#include "atlimage.h"
 #pragma once
 //Player class
 
@@ -108,7 +108,7 @@ public:
 // Player 클래스 정의
 class Player {
 public:
-    int UID;
+    CString UID;
     CString name;
     int age;
     int salary;
@@ -128,29 +128,6 @@ public:
 
 };
 
-//class Node {
-//public:
-//    Player data;
-//    Node* next;
-//    Node* prev;
-//
-//    Node(const Player& data);
-//};
-//
-//class LinkedList {
-//public:
-//    Node* head;
-//    LinkedList();
-//    void Insert(const Player& data);
-//    void Delete(int UID);
-//    ~LinkedList();
-//};
-//
-//class ListCSVrecommond :public LinkedList {
-//public:
-//    void ReadCSVFile(const std::string& filename);
-//
-//};
 // Cfm2024Dlg 대화 상자
 class Cfm2024Dlg : public CDialogEx
 {
@@ -251,5 +228,10 @@ public:
 
     afx_msg void OnClickedButtonNext();
     afx_msg void OnClickedButtonPrev();
+    CStatic m_picture_control;
+    CImage m_image;
+    CImage m_curImage;
+    CString m_filepath;
+    CString m_strUIDPath;
 };
 
