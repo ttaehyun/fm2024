@@ -183,24 +183,32 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CMakerDlg.h" />
     <ClInclude Include="fm2024.h" />
     <ClInclude Include="fm2024Dlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="list.h" />
+    <ClInclude Include="Mainmenu.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SearchDlg.h" />
+    <ClInclude Include="SelDlg.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CMakerDlg.cpp" />
     <ClCompile Include="fm2024.cpp" />
     <ClCompile Include="fm2024Dlg.cpp" />
     <ClCompile Include="list.cpp" />
+    <ClCompile Include="Mainmenu.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SearchDlg.cpp" />
+    <ClCompile Include="SelDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="fm2024.rc" />

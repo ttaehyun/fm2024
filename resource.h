@@ -7,6 +7,11 @@
 #define IDS_ABOUTBOX                    101
 #define IDD_FM2024_DIALOG               102
 #define IDR_MAINFRAME                   128
+#define IDD_DIALOG_START                134
+#define IDD_DIALOG_MAKER                136
+#define IDD_DIALOG_SEL                  138
+#define IDD_DIALOG_SEARCH               140
+#define IDD_FM2024AI_DIALOG             141
 #define IDC_EDIT_CORNERS                1000
 #define IDC_EDIT_CROSSING               1001
 #define IDC_EDIT_DRIBBLING              1002
@@ -76,16 +81,61 @@
 #define IDC_EDIT_POSITION               1066
 #define IDC_BUTTON1                     1069
 #define IDC_BUTTON_NEXT                 1069
+#define IDC_BUTTON_START                1069
 #define IDC_BUTTON_PREV                 1070
+#define IDC_BUTTON_YOO                  1070
 #define IDC_FACE                        1071
+#define IDC_BUTTON2                     1073
+#define IDC_BUTTON_MAKER                1073
+#define IDC_BUTTON_AI                   1073
+#define IDC_BUTTON_FIND                 1073
+#define IDC_COMBO_STAT2                 1078
+#define IDC_BUTTON_STRIKER              1086
+#define IDC_EDIT_ALL                    1087
+#define IDC_EDIT_COUNT                  1088
+#define IDC_BUTTON_WINGER               1089
+#define IDC_COMBO_STAT1                 1089
+#define IDC_COMBO_STAT3                 1090
+#define IDC_BUTTON_ATKMID               1091
+#define IDC_BUTTON_CENTMID              1092
+#define IDC_BUTTON_DEFMID               1093
+#define IDC_BUTTON_LEFTFULL             1094
+#define IDC_EDIT_STAT1_MIN              1094
+#define IDC_BUTTON_RIGHTFULL            1095
+#define IDC_EDIT_HEIGHT_MIN             1095
+#define IDC_BUTTON_DEF                  1096
+#define IDC_CHECK_STAT1                 1096
+#define IDC_BUTTON_GOALKEEP             1097
+#define IDC_CHECK_STAT2                 1097
+#define IDC_BUTTON_ALL                  1098
+#define IDC_CHECK_STAT3                 1098
+#define IDC_CHECK_HEIGHT                1099
+#define IDC_CHECK_WEIGHT                1100
+#define IDC_CHECK_AGE                   1101
+#define IDC_EDIT_WEIGHT_MIN             1102
+#define IDC_EDIT_STAT1_MAX              1103
+#define IDC_EDIT_STAT2_MAX              1104
+#define IDC_EDIT_STAT2_MIN              1105
+#define IDC_EDIT_STAT3_MIN              1106
+#define IDC_EDIT_STAT3_MAX              1107
+#define IDC_EDIT_HEIGHT_MAX             1108
+#define IDC_EDIT_WEIGHT_MAX             1109
+#define IDC_EDIT_AGE_MIN                1110
+#define IDC_EDIT_AGE_MAX                1111
+#define IDC_CHECK_LEFTFOOT              1112
+#define IDC_CHECK_RIGHTFOOT             1113
+#define IDC_EDIT_LEFTFOOT_MIN           1114
+#define IDC_EDIT_RIGHTFOOT_MIN          1115
+#define IDC_EDIT_LEFTFOOT_MAX           1116
+#define IDC_EDIT_RIGHTFOOT_MAX          1117
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        134
+#define _APS_NEXT_RESOURCE_VALUE        144
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1072
+#define _APS_NEXT_CONTROL_VALUE         1113
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

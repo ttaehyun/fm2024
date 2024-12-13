@@ -7,6 +7,7 @@
 #include "fm2024.h"
 #include "fm2024Dlg.h"
 #include "afxdialogex.h"
+#include "SearchDlg.h"
 
 #include "afxwin.h"
 #include "fstream"
@@ -14,6 +15,7 @@
 #include "iostream"
 #include "vector"
 #include "string"
+#include "map"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -25,8 +27,8 @@ public:
 	Player data;
 	Node* next;
 	Node* prev;
-
-	Node(const Player& data) : data(data), next(nullptr), prev(nullptr) {}
+	int index;
+	Node(const Player& data, int index = 0) : data(data), next(nullptr), prev(nullptr), index(index) {}
 };
 
 class LinkedList {
@@ -36,8 +38,16 @@ public:
 	Node* current;
 	LinkedList() : head(nullptr), current(nullptr) {}
 
+	int GetCurrentIndex() const {
+		if (current) {
+			return current->index;
+		}
+		return -1; // 노드가 없을 경우
+	}
+
 	void Insert(const Player& data) {
-		Node* newNode = new Node(data);
+		int newIndex = head ? head->prev->index + 1 : 1; //새 노드의 인덱스 계산
+		Node* newNode = new Node(data, newIndex);
 
 		if (!head) {
 			head = newNode;
@@ -71,6 +81,13 @@ public:
 
 					if (current_del == head) head = nextNode;
 					delete current_del;
+
+					Node* temp = nextNode;
+					int newIndex = temp->prev->index + 1;
+					do {
+						temp->index = newIndex++;
+						temp = temp->next;
+					} while (temp != head);
 				}
 				return;
 			}
@@ -93,6 +110,11 @@ public:
 			current = current->prev;
 		}
 	}
+
+	int GetSize() const {
+		if (!head) return 0;
+		return head->prev->index;
+	}
 	~LinkedList() {
 		if (!head) return;
 		Node* current = head;
@@ -106,7 +128,23 @@ public:
 
 class ListCSVrecommond : public LinkedList {
 public:
-	
+
+	// 리스트 데이터 삭제 함수
+	void Clear() {
+		if (!head) return;
+
+		Node* current = head;
+		do {
+			Node* nextNode = current->next;
+			delete current; // 메모리 해제
+			current = nextNode;
+		} while (current != head);
+
+		head = nullptr;
+		current = nullptr;
+		
+	}
+
 	void ReadCSVFile(const std::string& filename) {
 		std::ifstream file(filename);
 		if (!file.is_open()) {
@@ -118,7 +156,7 @@ public:
 		std::string line;
 		bool header = true;
 		while (std::getline(file, line)) {
-			if (header) {  // 헤더 행은 건너뜀
+			if (header) { // 헤더 행은 건너뜀
 				header = false;
 				continue;
 			}
@@ -236,6 +274,7 @@ public:
 };
 
 ListCSVrecommond list;
+ListCSVrecommond origin;
 // -----------------------------------------------------------------------------//
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -246,7 +285,7 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_ABOUTBOX };
+	enum statMap[IDD = IDD_ABOUTBOX };
 #endif
 
 	protected:
@@ -343,6 +382,8 @@ Cfm2024Dlg::Cfm2024Dlg(CWnd* pParent /*=nullptr*/)
 	, m_intWork_rate(0)
 	, m_strPosition(_T(""))
 	, m_intPosition_stat(0)
+	, m_nIndex(0)
+	, m_nSizeALL(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -419,6 +460,8 @@ void Cfm2024Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT_POSITION, m_strPosition);
 	DDX_Text(pDX, IDC_EDIT_POSITION_STAT, m_intPosition_stat);
 	DDX_Control(pDX, IDC_FACE, m_picture_control);
+	DDX_Text(pDX, IDC_EDIT_COUNT, m_nIndex);
+	DDX_Text(pDX, IDC_EDIT_ALL, m_nSizeALL);
 }
 
 BEGIN_MESSAGE_MAP(Cfm2024Dlg, CDialogEx)
@@ -428,6 +471,18 @@ BEGIN_MESSAGE_MAP(Cfm2024Dlg, CDialogEx)
 
 	ON_BN_CLICKED(IDC_BUTTON_NEXT, &Cfm2024Dlg::OnClickedButtonNext)
 	ON_BN_CLICKED(IDC_BUTTON_PREV, &Cfm2024Dlg::OnClickedButtonPrev)
+	ON_BN_CLICKED(IDC_BUTTON_STRIKER, &Cfm2024Dlg::OnClickedButtonStriker)
+//	ON_BN_CLICKED(IDC_BUTTON2, &Cfm2024Dlg::OnBnClickedButton2)
+ON_BN_CLICKED(IDC_BUTTON_WINGER, &Cfm2024Dlg::OnClickedButtonWinger)
+ON_BN_CLICKED(IDC_BUTTON_ATKMID, &Cfm2024Dlg::OnClickedButtonAtkmid)
+ON_BN_CLICKED(IDC_BUTTON_CENTMID, &Cfm2024Dlg::OnClickedButtonCentmid)
+ON_BN_CLICKED(IDC_BUTTON_DEFMID, &Cfm2024Dlg::OnClickedButtonDefmid)
+ON_BN_CLICKED(IDC_BUTTON_LEFTFULL, &Cfm2024Dlg::OnClickedButtonLeftfull)
+ON_BN_CLICKED(IDC_BUTTON_RIGHTFULL, &Cfm2024Dlg::OnClickedButtonRightfull)
+ON_BN_CLICKED(IDC_BUTTON_DEF, &Cfm2024Dlg::OnClickedButtonDef)
+ON_BN_CLICKED(IDC_BUTTON_GOALKEEP, &Cfm2024Dlg::OnClickedButtonGoalkeep)
+ON_BN_CLICKED(IDC_BUTTON_FIND, &Cfm2024Dlg::OnClickedButtonFind)
+ON_BN_CLICKED(IDC_BUTTON_ALL, &Cfm2024Dlg::OnClickedButtonAll)
 END_MESSAGE_MAP()
 
 
@@ -464,10 +519,14 @@ BOOL Cfm2024Dlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	m_filepath = _T("C:\\Users\\th\\Desktop\\24-2opensw\\fm2024\\image\\");
+	list.Clear();
+	origin.Clear();
 	list.ReadCSVFile("FM2023.csv");
+	origin.ReadCSVFile("FM2023.csv");
 	//m_strUIDPath = m_filepath + list.head->data.UID;
-	UpdateDisplay();
+	UpdateDisplay(list);
 	
+
 	// 이미지 로드
 	if (FAILED(m_image.Load(m_strUIDPath))) {
 		AfxMessageBox(_T("이미지를 로드할 수 없습니다."));
@@ -535,10 +594,10 @@ HCURSOR Cfm2024Dlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void Cfm2024Dlg::UpdateDisplay()
+void Cfm2024Dlg::UpdateDisplay(ListCSVrecommond& List)
 {
 	// TODO: 여기에 구현 코드 추가.
-	Player* player = list.GetCurrentPlayer();
+	Player* player = List.GetCurrentPlayer();
 	if (player) {
 		m_strUIDPath = m_filepath + player->UID + _T(".png");
 		m_strName = player->name;;
@@ -608,6 +667,8 @@ void Cfm2024Dlg::UpdateDisplay()
 		m_intProfessional = player->stat.professional;
 		m_intSportsmanship = player->stat.sportsmanship;
 		m_intEmotional_control = player->stat.emotional_control;
+		m_nIndex = list.GetCurrentIndex();
+		m_nSizeALL = list.GetSize();
 		
 		UpdateData(FALSE);
 		//Invalidate();
@@ -621,7 +682,7 @@ void Cfm2024Dlg::OnClickedButtonNext()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	list.MoveNext();
-	UpdateDisplay();
+	UpdateDisplay(list);
 
 	m_image.Destroy();
 	if (!m_strUIDPath.IsEmpty()) {
@@ -635,10 +696,698 @@ void Cfm2024Dlg::OnClickedButtonPrev()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	list.MovePrev();
-	UpdateDisplay();
+	UpdateDisplay(list);
 	m_image.Destroy();
 	if (!m_strUIDPath.IsEmpty()) {
 		m_image.Load(m_strUIDPath);
 	}
 	OnPaint();
+}
+
+
+void Cfm2024Dlg::isPromisingStriker(ListCSVrecommond& list)
+{
+	// TODO: 여기에 구현 코드 추가.
+	list.Clear();
+	
+	if (!origin.head) {
+		AfxMessageBox(_T("저장된 리스트가 없습니다."));
+	}
+
+	Node* currentNode = origin.head;
+	do {
+		Player player = currentNode->data;
+
+		if ((player.stat.finishing >= 13 && player.stat.finishing <= 16) && (player.stat.heading >= 12 && player.stat.heading <= 15) &&
+			(player.stat.first_touch >= 11 && player.stat.first_touch <= 14) &&
+			(player.stat.technique >= 12 && player.stat.technique <= 15) &&
+			(player.stat.long_shots >= 10 && player.stat.long_shots <= 13) &&
+			(player.stat.anticipation >= 11 && player.stat.anticipation <= 15) &&
+			(player.stat.composure >= 10 && player.stat.composure <= 14) &&
+			(player.stat.off_the_ball >= 12 && player.stat.off_the_ball <= 16) &&
+			(player.stat.determination >= 11 && player.stat.determination <= 15) &&
+			(player.stat.pace >= 12 && player.stat.pace <= 15) &&
+			(player.stat.strength >= 11 && player.stat.strength <= 14) &&
+			(player.stat.jumping_reach >= 11 && player.stat.jumping_reach <= 14) &&
+			(player.age <= 20) && (player.positionStat.ST >= 18))
+		{
+			list.Insert(player);
+		}
+		currentNode = currentNode->next;
+	} while (currentNode != origin.head);
+}
+void Cfm2024Dlg::isPromisingWinger(ListCSVrecommond& list)
+{
+	// TODO: 여기에 구현 코드 추가.
+	list.Clear();
+
+	if (!origin.head) {
+		AfxMessageBox(_T("저장된 리스트가 없습니다."));
+	}
+
+	Node* currentNode = origin.head;
+	do {
+		Player player = currentNode->data;
+
+		if ((player.stat.dribbling >= 12 && player.stat.dribbling <= 16) &&
+			(player.stat.crossing >= 10 && player.stat.crossing <= 15) &&
+			(player.stat.first_touch >= 10 && player.stat.first_touch <= 14) &&
+			(player.stat.technique >= 13 && player.stat.technique <= 15) &&
+			(player.stat.long_shots >= 10 && player.stat.long_shots <= 14) &&
+			(player.stat.flair >= 12 && player.stat.flair <= 15) &&
+			(player.stat.off_the_ball >= 13 && player.stat.off_the_ball <= 15) &&
+			(player.stat.vision >= 11 && player.stat.vision <= 14) &&
+			(player.stat.decision >= 11 && player.stat.decision <= 13) &&
+			(player.stat.acceleration >= 14 && player.stat.acceleration <= 16) &&
+			(player.stat.pace >= 12 && player.stat.pace <= 15) &&
+			(player.stat.agility >= 12 && player.stat.agility <= 15) &&
+			(player.stat.balance >= 11 && player.stat.balance <= 13) &&
+			(player.age <= 20) && ((player.positionStat.AMR >= 18) || (player.positionStat.AML >= 18)))
+		{
+			list.Insert(player);
+		}
+		currentNode = currentNode->next;
+	} while (currentNode != origin.head);
+}
+
+void Cfm2024Dlg::isPromisingAttackingMidfielder(ListCSVrecommond& list)
+{
+	// TODO: 여기에 구현 코드 추가.
+	list.Clear();
+
+	if (!origin.head) {
+		AfxMessageBox(_T("저장된 리스트가 없습니다."));
+	}
+
+	Node* currentNode = origin.head;
+	do {
+		Player player = currentNode->data;
+
+		if ((player.stat.dribbling >= 12 && player.stat.dribbling <= 15) &&
+			(player.stat.passing >= 13 && player.stat.passing <= 16) &&
+			(player.stat.first_touch >= 10 && player.stat.first_touch <= 15) &&
+			(player.stat.technique >= 12 && player.stat.technique <= 16) &&
+			(player.stat.finishing >= 10 && player.stat.finishing <= 13) &&
+			(player.stat.vision >= 14 && player.stat.vision <= 16) &&
+			(player.stat.decision >= 10 && player.stat.decision <= 15) &&
+			(player.stat.flair >= 12 && player.stat.flair <= 16) &&
+			(player.stat.anticipation >= 12 && player.stat.anticipation <= 14) &&
+			(player.stat.agility >= 12 && player.stat.agility <= 15) &&
+			(player.stat.acceleration >= 11 && player.stat.acceleration <= 14) &&
+			(player.age <= 20) && ((player.positionStat.AMC >= 18) && (player.positionStat.AML >= 12) && (player.positionStat.AMR >= 12)))
+		{
+			list.Insert(player);
+		}
+		currentNode = currentNode->next;
+	} while (currentNode != origin.head);
+}
+
+
+void Cfm2024Dlg::isPromisingDefensiveMidfielder(ListCSVrecommond& list)
+{
+	// TODO: 여기에 구현 코드 추가.
+	list.Clear();
+
+	if (!origin.head) {
+		AfxMessageBox(_T("저장된 리스트가 없습니다."));
+	}
+
+	Node* currentNode = origin.head;
+	do {
+		Player player = currentNode->data;
+
+		if ((player.stat.tackling >= 12 && player.stat.tackling <= 16) &&
+			(player.stat.marking >= 11 && player.stat.marking <= 15) &&
+			(player.stat.passing >= 10 && player.stat.passing <= 14) &&
+			(player.stat.first_touch >= 10 && player.stat.first_touch <= 14) &&
+			(player.stat.anticipation >= 12 && player.stat.anticipation <= 15) &&
+			(player.stat.concentration >= 12 && player.stat.concentration <= 15) &&
+			(player.stat.decision >= 11 && player.stat.decision <= 14) &&
+			(player.stat.strength >= 12 && player.stat.strength <= 15) &&
+			(player.stat.stamina >= 12 && player.stat.stamina <= 15) &&
+			(player.stat.balance >= 12 && player.stat.balance <= 15) &&
+			(player.age <= 20) && (player.positionStat.DM >= 18))
+		{
+			list.Insert(player);
+		}
+		currentNode = currentNode->next;
+	} while (currentNode != origin.head);
+}
+
+
+void Cfm2024Dlg::isPromisingCentralMidfielder(ListCSVrecommond& list)
+{
+	// TODO: 여기에 구현 코드 추가.
+	list.Clear();
+
+	if (!origin.head) {
+		AfxMessageBox(_T("저장된 리스트가 없습니다."));
+	}
+
+	Node* currentNode = origin.head;
+	do {
+		Player player = currentNode->data;
+
+		if ((player.stat.passing >= 14 && player.stat.passing <= 16) &&
+			(player.stat.first_touch >= 12 && player.stat.first_touch <= 15) &&
+			(player.stat.technique >= 13 && player.stat.technique <= 15) &&
+			(player.stat.tackling >= 10 && player.stat.tackling <= 13) &&
+			(player.stat.vision >= 12 && player.stat.vision <= 15) &&
+			(player.stat.decision >= 11 && player.stat.decision <= 14) &&
+			(player.stat.teamwork >= 13 && player.stat.teamwork <= 16) &&
+			(player.stat.work_rate >= 12 && player.stat.work_rate <= 15) &&
+			(player.stat.composure >= 11 && player.stat.composure <= 14) &&
+			(player.stat.stamina >= 13 && player.stat.stamina <= 16) &&
+			(player.stat.balance >= 13 && player.stat.balance <= 14) &&
+			(player.age <= 20) && (player.positionStat.MC >= 18))
+		{
+			list.Insert(player);
+		}
+		currentNode = currentNode->next;
+	} while (currentNode != origin.head);
+}
+
+
+void Cfm2024Dlg::isPromisingLeftFullback(ListCSVrecommond& list)
+{
+	// TODO: 여기에 구현 코드 추가.
+	list.Clear();
+
+	if (!origin.head) {
+		AfxMessageBox(_T("저장된 리스트가 없습니다."));
+	}
+
+	Node* currentNode = origin.head;
+	do {
+		Player player = currentNode->data;
+
+		if ((player.stat.crossing >= 12 && player.stat.crossing <= 16) &&
+			(player.stat.dribbling >= 10 && player.stat.dribbling <= 15) &&
+			(player.stat.passing >= 10 && player.stat.passing <= 14) &&
+			(player.stat.technique >= 12 && player.stat.technique <= 14) &&
+			(player.stat.off_the_ball >= 12 && player.stat.off_the_ball <= 15) &&
+			(player.stat.decision >= 12 && player.stat.decision <= 13) &&
+			(player.stat.teamwork >= 12 && player.stat.teamwork <= 15) &&
+			(player.stat.work_rate >= 12 && player.stat.work_rate <= 16) &&
+			(player.stat.acceleration >= 13 && player.stat.acceleration <= 16) &&
+			(player.stat.pace >= 13 && player.stat.pace <= 15) &&
+			(player.stat.stamina >= 12 && player.stat.stamina <= 15) &&
+			(player.footStat.left >= 15 && player.footStat.right <= 20) &&
+			(player.age <= 20) && ((player.positionStat.WBL >= 16) || (player.positionStat.DR >= 18)))
+		{
+			list.Insert(player);
+		}
+		currentNode = currentNode->next;
+	} while (currentNode != origin.head);
+}
+
+
+void Cfm2024Dlg::isPromisingRightFullback(ListCSVrecommond& list)
+{
+	// TODO: 여기에 구현 코드 추가.
+	list.Clear();
+
+	if (!origin.head) {
+		AfxMessageBox(_T("저장된 리스트가 없습니다."));
+	}
+
+	Node* currentNode = origin.head;
+	do {
+		Player player = currentNode->data;
+
+		if ((player.stat.crossing >= 14 && player.stat.crossing <= 16) &&
+			(player.stat.dribbling >= 10 && player.stat.dribbling <= 15) &&
+			(player.stat.passing >= 12 && player.stat.passing <= 14) &&
+			(player.stat.technique >= 12 && player.stat.technique <= 14) &&
+			(player.stat.off_the_ball >= 11 && player.stat.off_the_ball <= 15) &&
+			(player.stat.decision >= 12 && player.stat.decision <= 13) &&
+			(player.stat.teamwork >= 12 && player.stat.teamwork <= 15) &&
+			(player.stat.work_rate >= 12 && player.stat.work_rate <= 16) &&
+			(player.stat.acceleration >= 13 && player.stat.acceleration <= 16) &&
+			(player.stat.pace >= 14 && player.stat.pace <= 15) &&
+			(player.stat.stamina >= 12 && player.stat.stamina <= 15) &&
+			(player.footStat.left >= 16 && player.footStat.right <= 20) &&
+			(player.age <= 24) && ((player.positionStat.WBR >= 16) || (player.positionStat.DL >= 18)))
+		{
+			list.Insert(player);
+		}
+		currentNode = currentNode->next;
+	} while (currentNode != origin.head);
+}
+
+
+void Cfm2024Dlg::isPromisingCenterBack(ListCSVrecommond& list)
+{
+	// TODO: 여기에 구현 코드 추가.
+	list.Clear();
+
+	if (!origin.head) {
+		AfxMessageBox(_T("저장된 리스트가 없습니다."));
+	}
+
+	Node* currentNode = origin.head;
+	do {
+		Player player = currentNode->data;
+
+		if ((player.stat.tackling >= 12 && player.stat.tackling <= 17) &&
+			(player.stat.marking >= 12 && player.stat.marking <= 16) &&
+			(player.stat.heading >= 12 && player.stat.heading <= 16) &&
+			(player.stat.anticipation >= 12 && player.stat.anticipation <= 17) &&
+			(player.stat.concentration >= 12 && player.stat.concentration <= 16) &&
+			(player.stat.decision >= 11 && player.stat.decision <= 16) &&
+			(player.stat.bravery >= 12 && player.stat.bravery <= 15) &&
+			(player.stat.strength >= 13 && player.stat.strength <= 16) &&
+			(player.stat.jumping_reach >= 12 && player.stat.jumping_reach <= 15) &&
+			(player.stat.stamina >= 12 && player.stat.stamina <= 20) &&
+			(player.stat.pace >= 12 && player.stat.pace <= 16) &&
+			(player.age <= 20) && (player.positionStat.DC >= 20))
+		{
+			list.Insert(player);
+		}
+		currentNode = currentNode->next;
+	} while (currentNode != origin.head);
+}
+
+
+void Cfm2024Dlg::isPromisingGoalkeepers(ListCSVrecommond& list)
+{
+	// TODO: 여기에 구현 코드 추가.
+	list.Clear();
+
+	if (!origin.head) {
+		AfxMessageBox(_T("저장된 리스트가 없습니다."));
+	}
+
+	Node* currentNode = origin.head;
+	do {
+		Player player = currentNode->data;
+
+		if ((player.stat.handling >= 11 && player.stat.handling <= 20) &&
+			(player.stat.kicking >= 10 && player.stat.kicking <= 20) &&
+			(player.stat.one_on_ones >= 12 && player.stat.one_on_ones <= 20) &&
+			(player.stat.reflexes >= 11 && player.stat.reflexes <= 20) &&
+			(player.stat.rushing_out >= 15 && player.stat.rushing_out <= 20) &&
+			(player.stat.punching >= 7 && player.stat.punching <= 20) &&
+			(player.stat.throwing >= 11 && player.stat.throwing <= 20) &&
+			(player.age <= 20) && (player.positionStat.GK >= 20))
+		{
+			list.Insert(player);
+		}
+		currentNode = currentNode->next;
+	} while (currentNode != origin.head);
+}
+
+void Cfm2024Dlg::OnClickedButtonStriker()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	isPromisingStriker(list);
+	
+	if (!list.head) {
+		AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+		return;
+	}
+
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+
+void Cfm2024Dlg::OnClickedButtonWinger()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	isPromisingWinger(list);
+
+	if (!list.head) {
+		AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+		return;
+	}
+
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+
+void Cfm2024Dlg::OnClickedButtonAtkmid()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	isPromisingAttackingMidfielder(list);
+	if (!list.head) {
+		AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+		return;
+	}
+
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+
+void Cfm2024Dlg::OnClickedButtonCentmid()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	isPromisingCentralMidfielder(list);
+	if (!list.head) {
+		AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+		return;
+	}
+
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+
+void Cfm2024Dlg::OnClickedButtonDefmid()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	isPromisingDefensiveMidfielder(list);
+	if (!list.head) {
+		AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+		return;
+	}
+
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+
+void Cfm2024Dlg::OnClickedButtonLeftfull()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	isPromisingLeftFullback(list);
+	if (!list.head) {
+		AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+		return;
+	}
+
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+
+void Cfm2024Dlg::OnClickedButtonRightfull()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	isPromisingRightFullback(list);
+	if (!list.head) {
+		AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+		return;
+	}
+
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+void Cfm2024Dlg::OnClickedButtonDef()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	isPromisingCenterBack(list);
+	if (!list.head) {
+		AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+		return;
+	}
+
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+
+void Cfm2024Dlg::OnClickedButtonGoalkeep()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	isPromisingGoalkeepers(list);
+	if (!list.head) {
+		AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+		return;
+	}
+
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+void Cfm2024Dlg::OnClickedButtonAll()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	list.Clear();
+	list.ReadCSVFile("FM2023.csv");
+	if (!list.head) {
+		AfxMessageBox(_T("리스트가 비었습니다."));
+		return;
+	}
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+}
+
+void Cfm2024Dlg::OnClickedButtonFind()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	
+	SearchDlg dlg;
+	if (dlg.DoModal() == IDOK) {
+		bool findPlayer = false;
+		bool stat1 = true;
+		bool stat2 = true;
+		bool stat3 = true;
+		bool checked[3];
+		checked[0] = false; checked[1] = false; checked[2] = false;
+		int stat1Min =0, stat2Min=0, stat3Min=0, LeftFootMin=0, RightFootMin = 0;
+		int stat1Max=20, stat2Max=20, stat3Max=20, LeftFootMax=20, RightFootMax = 20;
+		int heightMin=0, heightMax = 250;
+		int weightMin=0, weightMax = 200;
+		int AgeMin=0, AgeMax = 100;
+
+		//bool형 stat자료 크기만큼 만들고, if문에 넣어놓고 bool형하고 and문으로 연결해서 작동하거나 안하거나 하게
+		if (dlg.m_bChecked[0]) {
+			checked[0] = true;
+			stat1Min = dlg.m_nStat1Min;
+			stat1Max = dlg.m_nStat1Max;
+		}
+		if (dlg.m_bChecked[1]) {
+			checked[1] = true;
+			stat2Min = dlg.m_nStat2Min;
+			stat2Max = dlg.m_nStat2Max;
+		}
+		if (dlg.m_bChecked[2]) {
+			checked[2] = true;
+			stat3Min = dlg.m_nStat3Min;
+			stat3Max = dlg.m_nStat3Max;
+		}
+		if (dlg.m_bChecked[3]) {
+			heightMin = dlg.m_nHeightMin;
+			heightMax = dlg.m_nHeightMax;
+		}
+		if (dlg.m_bChecked[4]) {
+			weightMin = dlg.m_nWeightMin;
+			weightMax = dlg.m_nWeightMax;
+		}
+		if (dlg.m_bChecked[5]) {
+			AgeMin = dlg.m_nAgeMin;
+			AgeMax = dlg.m_nAgeMax;
+		}
+		if (dlg.m_bChecked[6]) {
+			LeftFootMin = dlg.m_nLeftFootMin;
+			LeftFootMax = dlg.m_nLeftFootMax;
+		}
+		if (dlg.m_bChecked[7]) {
+			RightFootMin = dlg.m_nRightFootMin;
+			RightFootMax = dlg.m_nRightFootMax;
+		}
+		if (!origin.head) {
+			AfxMessageBox(_T("저장된 리스트가 없습니다."));
+		}
+
+		bool first = false;
+		Node* currentNode = origin.head;
+		do {
+			Player player = currentNode->data;
+			std::map<CString, int> statMap;
+			try {
+				statMap[_T("Corners")] = player.stat.corners;
+				statMap[_T("Crossing")] = player.stat.crossing;
+				statMap[_T("Dribbling")] = player.stat.dribbling;
+				statMap[_T("Finishing")] = player.stat.finishing;
+				statMap[_T("First Touch")] = player.stat.first_touch;
+				statMap[_T("Free Kick Taking")] = player.stat.free_kick_taking;
+				statMap[_T("Heading")] = player.stat.heading;
+				statMap[_T("Long Shots")] = player.stat.long_shots;
+				statMap[_T("Long Throws")] = player.stat.long_throws;
+				statMap[_T("Marking")] = player.stat.marking;
+				statMap[_T("Passing")] = player.stat.passing;
+				statMap[_T("Penalty Taking")] = player.stat.penalty_taking;
+				statMap[_T("Tackling")] = player.stat.tackling;
+				statMap[_T("Technique")] = player.stat.technique;
+				statMap[_T("Aggression")] = player.stat.aggression;
+				statMap[_T("Anticipation")] = player.stat.anticipation;
+				statMap[_T("Bravery")] = player.stat.bravery;
+				statMap[_T("Composure")] = player.stat.composure;
+				statMap[_T("Concentration")] = player.stat.concentration;
+				statMap[_T("Vision")] = player.stat.vision;
+				statMap[_T("Decision")] = player.stat.decision;
+				statMap[_T("Determination")] = player.stat.determination;
+				statMap[_T("Flair")] = player.stat.flair;
+				statMap[_T("Leadership")] = player.stat.leadership;
+				statMap[_T("Off The Ball")] = player.stat.off_the_ball;
+				statMap[_T("Position")] = player.stat.position;
+				statMap[_T("Teamwork")] = player.stat.teamwork;
+				statMap[_T("Work Rate")] = player.stat.work_rate;
+				statMap[_T("Acceleration")] = player.stat.acceleration;
+				statMap[_T("Agility")] = player.stat.agility;
+				statMap[_T("Balance")] = player.stat.balance;
+				statMap[_T("Jumping Reach")] = player.stat.jumping_reach;
+				statMap[_T("Natural Fitness")] = player.stat.natural_fitness;
+				statMap[_T("Pace")] = player.stat.pace;
+				statMap[_T("Stamina")] = player.stat.stamina;
+				statMap[_T("Strength")] = player.stat.strength;
+				statMap[_T("Stability")] = player.stat.stability;
+				statMap[_T("Foul")] = player.stat.foul;
+				statMap[_T("Contest Performance")] = player.stat.contest_performance;
+				statMap[_T("Injury")] = player.stat.injury;
+				statMap[_T("Diversity")] = player.stat.diversity;
+				statMap[_T("Aerial Reach")] = player.stat.aerial_reach;
+				statMap[_T("Command Of Area")] = player.stat.command_of_area;
+				statMap[_T("Communication")] = player.stat.communication;
+				statMap[_T("Eccentricity")] = player.stat.eccentricity;
+				statMap[_T("Handling")] = player.stat.handling;
+				statMap[_T("Kicking")] = player.stat.kicking;
+				statMap[_T("One On Ones")] = player.stat.one_on_ones;
+				statMap[_T("Reflexes")] = player.stat.reflexes;
+				statMap[_T("Rushing Out")] = player.stat.rushing_out;
+				statMap[_T("Punching")] = player.stat.punching;
+				statMap[_T("Throwing")] = player.stat.throwing;
+				statMap[_T("Adaptation")] = player.stat.adaptation;
+				statMap[_T("Ambition")] = player.stat.ambition;
+				statMap[_T("Argue")] = player.stat.argue;
+				statMap[_T("Loyal")] = player.stat.loyal;
+				statMap[_T("Resistant To Stress")] = player.stat.resistant_to_stress;
+				statMap[_T("Professional")] = player.stat.professional;
+				statMap[_T("Sportsmanship")] = player.stat.sportsmanship;
+				statMap[_T("Emotional Control")] = player.stat.emotional_control;
+			}
+			catch (const std::exception& e) {
+				CString msg;
+				msg.Format(_T("맵 삽입 중 오류 발생 : % s"), e.what());
+				AfxMessageBox(msg);
+			}
+			if (checked[0]) {
+
+				auto it = statMap.find(dlg.m_strStat1);
+				if (it != statMap.end()) {
+					int statValue = it->second;
+					if (statValue >= stat1Min && statValue <= stat1Max) {
+						stat1 = true;
+					}
+					else {
+						stat1 = false;
+					}
+				}
+				else {
+					AfxMessageBox(_T("해당 항목이 Stat에 없습니다."));
+					checked[0] = false;
+					stat1 = true;
+				}
+			}
+			if (checked[1]) {
+				auto it = statMap.find(dlg.m_strStat2);
+				if (it != statMap.end()) {
+					int statValue = it->second;
+					if (statValue >= stat2Min && statValue <= stat2Max) {
+						stat2 = true;
+					}
+					else {
+						stat2 = false;
+					}
+				}
+				else {
+					AfxMessageBox(_T("해당 항목이 Stat에 없습니다."));
+					checked[1] = false;
+					stat2 = true;
+				}
+			}
+			if (checked[2]) {
+				auto it = statMap.find(dlg.m_strStat3);
+				if (it != statMap.end()) {
+					int statValue = it->second;
+					if (statValue >= stat3Min && statValue <= stat3Max) {
+						stat3 = true;
+					}
+					else {
+						stat3 = false;
+					}
+				}
+				else {
+					AfxMessageBox(_T("해당 항목이 Stat에 없습니다."));
+					checked[2] = false;
+					stat3 = true;
+				}
+			}
+			if ((player.age >= AgeMin && player.age <= AgeMax) && 
+				(player.bodyStat.height >= heightMin && player.bodyStat.height <= heightMax) &&
+				(player.bodyStat.weight >= weightMin && player.bodyStat.weight <= weightMax) && 
+				(player.footStat.left >= LeftFootMin && player.footStat.left <= LeftFootMax) &&
+				(player.footStat.right >= RightFootMin && player.footStat.right <= RightFootMax) &&
+				stat1 && stat2 && stat3) 
+			{
+				findPlayer = true;
+				if (findPlayer && !first) {
+					list.Clear();
+					first = true;
+				}
+				list.Insert(player);
+			}
+			currentNode = currentNode->next;
+			stat1 = true;
+			stat2 = true;
+			stat3 = true;
+		} while (currentNode != origin.head);
+		
+		if (!findPlayer) {
+			AfxMessageBox(_T("조건에 맞는 선수가 없습니다."));
+			return;
+		}
+	}
+	UpdateDisplay(list);
+	m_image.Destroy();
+	if (!m_strUIDPath.IsEmpty()) {
+		m_image.Load(m_strUIDPath);
+	}
+	OnPaint();
+	
 }

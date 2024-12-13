@@ -123,11 +123,9 @@ public:
     PositionStat positionStat;
     BodyStat bodyStat;
     Stat stat;
-
-
-
 };
 
+class ListCSVrecommond;
 // Cfm2024Dlg 대화 상자
 class Cfm2024Dlg : public CDialogEx
 {
@@ -224,7 +222,7 @@ public:
 	int m_intPosition_stat;
 	
 
-    void UpdateDisplay();
+    void UpdateDisplay(ListCSVrecommond& List);
 
     afx_msg void OnClickedButtonNext();
     afx_msg void OnClickedButtonPrev();
@@ -233,5 +231,27 @@ public:
     CImage m_curImage;
     CString m_filepath;
     CString m_strUIDPath;
+    void isPromisingStriker(ListCSVrecommond& list);
+    void isPromisingWinger(ListCSVrecommond& list);
+    void isPromisingAttackingMidfielder(ListCSVrecommond& list);
+    void isPromisingDefensiveMidfielder(ListCSVrecommond& list);
+    void isPromisingCentralMidfielder(ListCSVrecommond& list);
+    void isPromisingLeftFullback(ListCSVrecommond& list);
+    void isPromisingRightFullback(ListCSVrecommond& list);
+    void isPromisingCenterBack(ListCSVrecommond& list);
+    void isPromisingGoalkeepers(ListCSVrecommond& list);
+    afx_msg void OnClickedButtonStriker();
+    int m_nIndex;
+    int m_nSizeALL;
+    afx_msg void OnClickedButtonWinger();
+    afx_msg void OnClickedButtonAtkmid();
+    afx_msg void OnClickedButtonCentmid();
+    afx_msg void OnClickedButtonDefmid();
+    afx_msg void OnClickedButtonLeftfull();
+    afx_msg void OnClickedButtonRightfull();
+    afx_msg void OnClickedButtonDef();
+    afx_msg void OnClickedButtonGoalkeep();
+    afx_msg void OnClickedButtonFind();
+    afx_msg void OnClickedButtonAll();
 };
 
